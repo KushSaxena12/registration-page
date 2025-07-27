@@ -1,0 +1,45 @@
+import java.io.*;
+import java.sql.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+public class RegisterServlet extends HttpServlet {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String fullname = request.getParameter("fullname");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        try {
+            // Load MySQL JDBC driver
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
+            // Connect to MySQL
+            Connection conn = DriverManager.getConnection(
+                    "jdbc:mysql://localhost:3306/registration_db", "root", "your_mysql_password");
+
+            // Insert user data
+            String sql = "INSERT INTO users (fullname, email, password) VALUES (?, ?, ?)";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, fullname);
+            ps.setString(2, email);
+            ps.setString(3, password);
+
+            int result = ps.executeUpdate();
+
+            if (result > 0) {
+                out.println("<h2>Registration successful!</h2>");
+            } else {
+                out.println("<h2>Registration failed.</h2>");
+            }
+
+            conn.close();
+        } catch (Exception e) {
+            out.println("<h2>Error: " + e.getMessage() + "</h2>");
+        }
+    }
+}
